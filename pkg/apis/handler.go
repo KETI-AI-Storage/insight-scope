@@ -30,6 +30,7 @@ func (h *Handler) SetupRoutes() *gin.Engine {
 
 	// Health check
 	router.GET("/health", h.handleHealth)
+	router.GET("/ready", h.handleReady)
 
 	// API v1 routes
 	v1 := router.Group("/api/v1")
@@ -68,6 +69,13 @@ func (h *Handler) handleHealth(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"status":    "healthy",
 		"component": "insight-scope",
+	})
+}
+
+// handleReady handles readiness check
+func (h *Handler) handleReady(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"status": "ready",
 	})
 }
 

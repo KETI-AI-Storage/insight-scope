@@ -25,6 +25,7 @@ import (
 type ScopeController struct {
 	k8sClient     kubernetes.Interface
 	yamlAnalyzer  *analyzer.YAMLAnalyzer
+	dagAnalyzer   *analyzer.DAGAnalyzer
 	modelDetector *detector.ModelDetector
 	traceClient   *client.TraceClient
 
@@ -56,9 +57,16 @@ func NewScopeController(kubeconfig string) (*ScopeController, error) {
 		return nil, fmt.Errorf("failed to create kubernetes client: %w", err)
 	}
 
+	// Create DAG analyzer (ignore error, DAG analysis is optional)
+	dagAnalyzer, err := analyzer.NewDAGAnalyzer(kubeconfig)
+	if err != nil {
+		log.Printf("Warning: DAG analyzer initialization failed: %v", err)
+	}
+
 	return &ScopeController{
 		k8sClient:     k8sClient,
 		yamlAnalyzer:  analyzer.NewYAMLAnalyzer(),
+		dagAnalyzer:   dagAnalyzer,
 		modelDetector: detector.NewModelDetector(),
 		traceClient:   client.NewTraceClient(),
 		analysisCache: make(map[string]*types.ScopeAnalysisResult),
@@ -116,6 +124,14 @@ func (sc *ScopeController) AnalyzePod(ctx context.Context, req *types.ScopeAnaly
 	if req.IncludeTraceData && pod.Status.PodIP != "" {
 		log.Printf("Scope Analysis %s: Fetching Insight Trace data", analysisID)
 		result.TraceAnalysis = sc.fetchTraceAnalysis(ctx, pod, req.WaitForTrace)
+	}
+
+	// Step 2.5: DAG Analysis (Argo Workflow DAG 분석)
+	if sc.dagAnalyzer != nil && pod.Labels != nil {
+		if _, hasWorkflow := pod.Labels["workflows.argoproj.io/workflow"]; hasWorkflow {
+			log.Printf("Scope Analysis %s: Analyzing Argo Workflow DAG", analysisID)
+			result.DAGAnalysis = sc.dagAnalyzer.AnalyzeFromPod(ctx, pod.Labels, pod.Namespace)
+		}
 	}
 
 	// Step 3: AI Model Detection (통합 분석)

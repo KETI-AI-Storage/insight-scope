@@ -35,20 +35,12 @@ func (ya *YAMLAnalyzer) AnalyzePod(pod *corev1.Pod) *types.YAMLAnalysisResult {
 	result := &types.YAMLAnalysisResult{
 		VolumeAnalyses: make([]types.VolumeAnalysis, 0),
 	}
-
-	// Find the main container (first non-sidecar container)
 	mainContainer := ya.findMainContainer(pod)
 	if mainContainer == nil {
 		return result
 	}
-
-	// Analyze container image
 	result.ImageAnalysis = ya.imageAnalyzer.Analyze(mainContainer.Image)
-
-	// Analyze command and args
 	result.CommandAnalysis = ya.commandAnalyzer.Analyze(mainContainer.Command, mainContainer.Args, mainContainer.Env)
-
-	// Analyze volumes
 	for _, vm := range mainContainer.VolumeMounts {
 		// Find corresponding volume
 		var volume *corev1.Volume
@@ -61,14 +53,8 @@ func (ya *YAMLAnalyzer) AnalyzePod(pod *corev1.Pod) *types.YAMLAnalysisResult {
 		analysis := ya.volumeAnalyzer.Analyze(&vm, volume)
 		result.VolumeAnalyses = append(result.VolumeAnalyses, *analysis)
 	}
-
-	// Analyze resources
 	result.ResourceAnalysis = ya.resourceAnalyzer.Analyze(&mainContainer.Resources)
-
-	// Analyze labels and annotations
 	result.AnnotationAnalysis = ya.annotationAnalyzer.Analyze(pod.Labels, pod.Annotations)
-
-	// Combine inferences
 	ya.combineInferences(result)
 
 	return result
@@ -95,19 +81,14 @@ func (ya *YAMLAnalyzer) findMainContainer(pod *corev1.Pod) *corev1.Container {
 	return nil
 }
 
-// combineInferences combines all analysis results to make final inference
 func (ya *YAMLAnalyzer) combineInferences(result *types.YAMLAnalysisResult) {
 	var confidence float64
 	var confidenceCount int
-
-	// Framework inference
 	if result.ImageAnalysis != nil && result.ImageAnalysis.DetectedFramework != types.FrameworkUnknown {
 		result.InferredFramework = result.ImageAnalysis.DetectedFramework
 		confidence += result.ImageAnalysis.Confidence
 		confidenceCount++
 	}
-
-	// Model inference - prioritize explicit annotation, then command, then image
 	if result.AnnotationAnalysis != nil && result.AnnotationAnalysis.ExplicitModel != "" {
 		result.InferredModel = types.AIModelType(result.AnnotationAnalysis.ExplicitModel)
 		confidence += 1.0
@@ -123,11 +104,7 @@ func (ya *YAMLAnalyzer) combineInferences(result *types.YAMLAnalysisResult) {
 	} else {
 		result.InferredModel = types.ModelUnknown
 	}
-
-	// Category inference from model
 	result.InferredCategory = ya.inferCategoryFromModel(result.InferredModel)
-
-	// Stage inference
 	if result.AnnotationAnalysis != nil && result.AnnotationAnalysis.ExplicitStage != "" {
 		result.InferredStage = types.PipelineStage(result.AnnotationAnalysis.ExplicitStage)
 	} else if result.CommandAnalysis != nil && result.CommandAnalysis.DetectedStage != types.StageUnknown {
@@ -137,21 +114,17 @@ func (ya *YAMLAnalyzer) combineInferences(result *types.YAMLAnalysisResult) {
 	} else {
 		result.InferredStage = types.StageUnknown
 	}
-
-	// Data type inference
 	if result.CommandAnalysis != nil && result.CommandAnalysis.DetectedDataType != types.DataTypeUnknown {
 		result.InferredDataType = result.CommandAnalysis.DetectedDataType
 	} else {
 		result.InferredDataType = ya.inferDataTypeFromCategory(result.InferredCategory)
 	}
-
-	// Calculate overall confidence
 	if confidenceCount > 0 {
 		result.Confidence = confidence / float64(confidenceCount)
 	}
 }
 
-// inferCategoryFromModel infers model category from model type
+// todo: 모델들에 대한 정의를 지속적으로 업데이트 필요.
 func (ya *YAMLAnalyzer) inferCategoryFromModel(model types.AIModelType) types.AIModelCategory {
 	visionModels := map[types.AIModelType]bool{
 		types.ModelResNet: true, types.ModelVGG: true, types.ModelInception: true,

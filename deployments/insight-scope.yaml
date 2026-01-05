@@ -22,6 +22,9 @@ rules:
   - apiGroups: [""]
     resources: ["nodes"]
     verbs: ["get", "list"]
+  - apiGroups: ["argoproj.io"]
+    resources: ["workflows"]
+    verbs: ["get", "list", "watch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -61,15 +64,13 @@ spec:
           image: ketidevit2/insight-scope:latest
           imagePullPolicy: Always
           ports:
-            - containerPort: 8081
-              name: http
             - containerPort: 9092
-              name: grpc
+              name: http
           env:
-            - name: PORT
-              value: "8081"
-            - name: GRPC_PORT
+            - name: HTTP_PORT
               value: "9092"
+            - name: GRPC_PORT
+              value: "50054"
           resources:
             requests:
               cpu: "100m"
@@ -79,14 +80,14 @@ spec:
               memory: "512Mi"
           readinessProbe:
             httpGet:
-              path: /health
-              port: 8081
+              path: /ready
+              port: 9092
             initialDelaySeconds: 5
             periodSeconds: 10
           livenessProbe:
             httpGet:
               path: /health
-              port: 8081
+              port: 9092
             initialDelaySeconds: 10
             periodSeconds: 30
 ---
@@ -102,9 +103,6 @@ spec:
     app: insight-scope
   ports:
     - name: http
-      port: 8081
-      targetPort: 8081
-    - name: grpc
       port: 9092
       targetPort: 9092
   type: ClusterIP

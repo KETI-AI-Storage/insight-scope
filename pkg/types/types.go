@@ -301,6 +301,9 @@ type ScopeAnalysisResult struct {
 	// Trace Analysis (동적 분석 - Insight Trace 연동)
 	TraceAnalysis *TraceAnalysisResult `json:"trace_analysis,omitempty"`
 
+	// DAG Analysis (Argo Workflow DAG 분석)
+	DAGAnalysis *DAGAnalysis `json:"dag_analysis,omitempty"`
+
 	// Combined AI Model Signature (통합 결과)
 	ModelSignature *AIModelSignature `json:"model_signature"`
 
@@ -402,4 +405,64 @@ type ModelProfile struct {
 	RecommendedIOPS         int64  `json:"recommended_iops"`
 	RecommendedThroughput   int64  `json:"recommended_throughput_mbps"`
 	ReadWriteRatio          float64 `json:"read_write_ratio"`
+}
+
+// =====================================================
+// Argo Workflow DAG Analysis Types
+// =====================================================
+
+// DAGAnalysis represents analysis of Argo Workflow DAG structure
+type DAGAnalysis struct {
+	WorkflowName    string          `json:"workflow_name"`
+	WorkflowNamespace string        `json:"workflow_namespace"`
+	TotalSteps      int             `json:"total_steps"`
+	CurrentStep     string          `json:"current_step"`
+	CurrentStepIndex int            `json:"current_step_index"`
+	Steps           []DAGStep       `json:"steps"`
+	DataFlow        []DataFlowEdge  `json:"data_flow,omitempty"`
+	ExecutionHistory []StepExecution `json:"execution_history,omitempty"`
+
+	// Inferred characteristics from DAG
+	InferredPipelineType  string    `json:"inferred_pipeline_type"`  // training, inference, etl
+	InferredDataPattern   IOPattern `json:"inferred_data_pattern"`   // based on DAG structure
+	EstimatedTotalIOGB    float64   `json:"estimated_total_io_gb"`
+	ParallelismLevel      int       `json:"parallelism_level"`
+}
+
+// DAGStep represents a single step in the DAG
+type DAGStep struct {
+	Name          string        `json:"name"`
+	Template      string        `json:"template"`
+	Dependencies  []string      `json:"dependencies,omitempty"`
+	Phase         string        `json:"phase"`          // Pending, Running, Succeeded, Failed
+	StepType      PipelineStage `json:"step_type"`      // preprocessing, training, evaluation
+	IOPattern     IOPattern     `json:"io_pattern"`     // inferred I/O pattern for this step
+	EstimatedIOGB float64       `json:"estimated_io_gb"`
+}
+
+// DataFlowEdge represents data flow between steps
+type DataFlowEdge struct {
+	FromStep    string `json:"from_step"`
+	ToStep      string `json:"to_step"`
+	DataType    string `json:"data_type,omitempty"`    // model, dataset, checkpoint
+	EstimatedSizeGB float64 `json:"estimated_size_gb,omitempty"`
+}
+
+// StepExecution represents execution history of a step
+type StepExecution struct {
+	StepName      string  `json:"step_name"`
+	StartTime     string  `json:"start_time,omitempty"`
+	EndTime       string  `json:"end_time,omitempty"`
+	DurationSec   float64 `json:"duration_sec,omitempty"`
+	Status        string  `json:"status"`
+	ResourceUsage *StepResourceUsage `json:"resource_usage,omitempty"`
+}
+
+// StepResourceUsage represents resource usage during step execution
+type StepResourceUsage struct {
+	AvgCPUPercent    float64 `json:"avg_cpu_percent"`
+	AvgMemoryPercent float64 `json:"avg_memory_percent"`
+	AvgGPUPercent    float64 `json:"avg_gpu_percent,omitempty"`
+	TotalReadGB      float64 `json:"total_read_gb"`
+	TotalWriteGB     float64 `json:"total_write_gb"`
 }
