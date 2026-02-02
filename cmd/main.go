@@ -7,6 +7,7 @@ import (
 	"syscall"
 
 	"insight-scope/pkg/apis"
+	"insight-scope/pkg/collector"
 	"insight-scope/pkg/controller"
 	scopeGrpc "insight-scope/pkg/grpc"
 )
@@ -45,6 +46,19 @@ func main() {
 		log.Fatalf("Failed to start gRPC server: %v", err)
 	}
 	log.Printf("gRPC server started on port %s", grpcPort)
+
+	// Initialize metrics collector (sends data to Node Resource Forecaster)
+	var metricsCollector *collector.MetricsCollector
+	enableForecaster := os.Getenv("ENABLE_FORECASTER")
+	if enableForecaster == "true" || enableForecaster == "1" {
+		metricsCollector, err = collector.NewMetricsCollector(kubeconfig)
+		if err != nil {
+			log.Printf("Warning: Failed to create metrics collector: %v", err)
+		} else {
+			metricsCollector.Start()
+			log.Println("Metrics collector started (sending to Node Resource Forecaster)")
+		}
+	}
 
 	// Initialize API handler
 	handler := apis.NewHandler(scopeController)
@@ -92,6 +106,9 @@ func main() {
 	// Wait for interrupt signal
 	<-quit
 	log.Println("Shutting down Insight Scope...")
+	if metricsCollector != nil {
+		metricsCollector.Stop()
+	}
 	grpcServer.Stop()
 	log.Println("Graceful shutdown completed")
 }

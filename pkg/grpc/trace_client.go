@@ -51,7 +51,7 @@ func (c *TraceClient) getOrCreateClient(address string) (pb.InsightTraceServiceC
 	}
 
 	// Create new connection
-	conn, err := grpc.NewClient(address,
+	conn, err := grpc.Dial(address,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {

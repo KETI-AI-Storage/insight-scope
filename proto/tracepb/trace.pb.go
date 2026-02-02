@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.11
 // 	protoc        v6.30.2
-// source: proto/trace.proto
+// source: trace.proto
 
 package tracepb
 
@@ -63,11 +63,11 @@ func (x WorkloadType) String() string {
 }
 
 func (WorkloadType) Descriptor() protoreflect.EnumDescriptor {
-	return file_proto_trace_proto_enumTypes[0].Descriptor()
+	return file_trace_proto_enumTypes[0].Descriptor()
 }
 
 func (WorkloadType) Type() protoreflect.EnumType {
-	return &file_proto_trace_proto_enumTypes[0]
+	return &file_trace_proto_enumTypes[0]
 }
 
 func (x WorkloadType) Number() protoreflect.EnumNumber {
@@ -76,7 +76,7 @@ func (x WorkloadType) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use WorkloadType.Descriptor instead.
 func (WorkloadType) EnumDescriptor() ([]byte, []int) {
-	return file_proto_trace_proto_rawDescGZIP(), []int{0}
+	return file_trace_proto_rawDescGZIP(), []int{0}
 }
 
 type PipelineStage int32
@@ -118,11 +118,11 @@ func (x PipelineStage) String() string {
 }
 
 func (PipelineStage) Descriptor() protoreflect.EnumDescriptor {
-	return file_proto_trace_proto_enumTypes[1].Descriptor()
+	return file_trace_proto_enumTypes[1].Descriptor()
 }
 
 func (PipelineStage) Type() protoreflect.EnumType {
-	return &file_proto_trace_proto_enumTypes[1]
+	return &file_trace_proto_enumTypes[1]
 }
 
 func (x PipelineStage) Number() protoreflect.EnumNumber {
@@ -131,7 +131,7 @@ func (x PipelineStage) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use PipelineStage.Descriptor instead.
 func (PipelineStage) EnumDescriptor() ([]byte, []int) {
-	return file_proto_trace_proto_rawDescGZIP(), []int{1}
+	return file_trace_proto_rawDescGZIP(), []int{1}
 }
 
 type IOPattern int32
@@ -176,11 +176,11 @@ func (x IOPattern) String() string {
 }
 
 func (IOPattern) Descriptor() protoreflect.EnumDescriptor {
-	return file_proto_trace_proto_enumTypes[2].Descriptor()
+	return file_trace_proto_enumTypes[2].Descriptor()
 }
 
 func (IOPattern) Type() protoreflect.EnumType {
-	return &file_proto_trace_proto_enumTypes[2]
+	return &file_trace_proto_enumTypes[2]
 }
 
 func (x IOPattern) Number() protoreflect.EnumNumber {
@@ -189,7 +189,7 @@ func (x IOPattern) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use IOPattern.Descriptor instead.
 func (IOPattern) EnumDescriptor() ([]byte, []int) {
-	return file_proto_trace_proto_rawDescGZIP(), []int{2}
+	return file_trace_proto_rawDescGZIP(), []int{2}
 }
 
 type GetMetricsRequest struct {
@@ -200,7 +200,7 @@ type GetMetricsRequest struct {
 
 func (x *GetMetricsRequest) Reset() {
 	*x = GetMetricsRequest{}
-	mi := &file_proto_trace_proto_msgTypes[0]
+	mi := &file_trace_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -212,7 +212,7 @@ func (x *GetMetricsRequest) String() string {
 func (*GetMetricsRequest) ProtoMessage() {}
 
 func (x *GetMetricsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_trace_proto_msgTypes[0]
+	mi := &file_trace_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -225,7 +225,7 @@ func (x *GetMetricsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMetricsRequest.ProtoReflect.Descriptor instead.
 func (*GetMetricsRequest) Descriptor() ([]byte, []int) {
-	return file_proto_trace_proto_rawDescGZIP(), []int{0}
+	return file_trace_proto_rawDescGZIP(), []int{0}
 }
 
 type GetSignatureRequest struct {
@@ -236,7 +236,7 @@ type GetSignatureRequest struct {
 
 func (x *GetSignatureRequest) Reset() {
 	*x = GetSignatureRequest{}
-	mi := &file_proto_trace_proto_msgTypes[1]
+	mi := &file_trace_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -248,7 +248,7 @@ func (x *GetSignatureRequest) String() string {
 func (*GetSignatureRequest) ProtoMessage() {}
 
 func (x *GetSignatureRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_trace_proto_msgTypes[1]
+	mi := &file_trace_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -261,7 +261,7 @@ func (x *GetSignatureRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSignatureRequest.ProtoReflect.Descriptor instead.
 func (*GetSignatureRequest) Descriptor() ([]byte, []int) {
-	return file_proto_trace_proto_rawDescGZIP(), []int{1}
+	return file_trace_proto_rawDescGZIP(), []int{1}
 }
 
 type GetTraceRequest struct {
@@ -274,7 +274,7 @@ type GetTraceRequest struct {
 
 func (x *GetTraceRequest) Reset() {
 	*x = GetTraceRequest{}
-	mi := &file_proto_trace_proto_msgTypes[2]
+	mi := &file_trace_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -286,7 +286,7 @@ func (x *GetTraceRequest) String() string {
 func (*GetTraceRequest) ProtoMessage() {}
 
 func (x *GetTraceRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_trace_proto_msgTypes[2]
+	mi := &file_trace_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -299,7 +299,7 @@ func (x *GetTraceRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetTraceRequest.ProtoReflect.Descriptor instead.
 func (*GetTraceRequest) Descriptor() ([]byte, []int) {
-	return file_proto_trace_proto_rawDescGZIP(), []int{2}
+	return file_trace_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *GetTraceRequest) GetIncludeMetricsHistory() bool {
@@ -325,7 +325,7 @@ type GetStageHistoryRequest struct {
 
 func (x *GetStageHistoryRequest) Reset() {
 	*x = GetStageHistoryRequest{}
-	mi := &file_proto_trace_proto_msgTypes[3]
+	mi := &file_trace_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -337,7 +337,7 @@ func (x *GetStageHistoryRequest) String() string {
 func (*GetStageHistoryRequest) ProtoMessage() {}
 
 func (x *GetStageHistoryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_trace_proto_msgTypes[3]
+	mi := &file_trace_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -350,7 +350,7 @@ func (x *GetStageHistoryRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetStageHistoryRequest.ProtoReflect.Descriptor instead.
 func (*GetStageHistoryRequest) Descriptor() ([]byte, []int) {
-	return file_proto_trace_proto_rawDescGZIP(), []int{3}
+	return file_trace_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *GetStageHistoryRequest) GetLimit() int32 {
@@ -369,7 +369,7 @@ type StreamMetricsRequest struct {
 
 func (x *StreamMetricsRequest) Reset() {
 	*x = StreamMetricsRequest{}
-	mi := &file_proto_trace_proto_msgTypes[4]
+	mi := &file_trace_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -381,7 +381,7 @@ func (x *StreamMetricsRequest) String() string {
 func (*StreamMetricsRequest) ProtoMessage() {}
 
 func (x *StreamMetricsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_trace_proto_msgTypes[4]
+	mi := &file_trace_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -394,7 +394,7 @@ func (x *StreamMetricsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StreamMetricsRequest.ProtoReflect.Descriptor instead.
 func (*StreamMetricsRequest) Descriptor() ([]byte, []int) {
-	return file_proto_trace_proto_rawDescGZIP(), []int{4}
+	return file_trace_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *StreamMetricsRequest) GetIntervalSeconds() int32 {
@@ -412,7 +412,7 @@ type StreamStageRequest struct {
 
 func (x *StreamStageRequest) Reset() {
 	*x = StreamStageRequest{}
-	mi := &file_proto_trace_proto_msgTypes[5]
+	mi := &file_trace_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -424,7 +424,7 @@ func (x *StreamStageRequest) String() string {
 func (*StreamStageRequest) ProtoMessage() {}
 
 func (x *StreamStageRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_trace_proto_msgTypes[5]
+	mi := &file_trace_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -437,7 +437,7 @@ func (x *StreamStageRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StreamStageRequest.ProtoReflect.Descriptor instead.
 func (*StreamStageRequest) Descriptor() ([]byte, []int) {
-	return file_proto_trace_proto_rawDescGZIP(), []int{5}
+	return file_trace_proto_rawDescGZIP(), []int{5}
 }
 
 type HealthCheckRequest struct {
@@ -448,7 +448,7 @@ type HealthCheckRequest struct {
 
 func (x *HealthCheckRequest) Reset() {
 	*x = HealthCheckRequest{}
-	mi := &file_proto_trace_proto_msgTypes[6]
+	mi := &file_trace_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -460,7 +460,7 @@ func (x *HealthCheckRequest) String() string {
 func (*HealthCheckRequest) ProtoMessage() {}
 
 func (x *HealthCheckRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_trace_proto_msgTypes[6]
+	mi := &file_trace_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -473,7 +473,7 @@ func (x *HealthCheckRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HealthCheckRequest.ProtoReflect.Descriptor instead.
 func (*HealthCheckRequest) Descriptor() ([]byte, []int) {
-	return file_proto_trace_proto_rawDescGZIP(), []int{6}
+	return file_trace_proto_rawDescGZIP(), []int{6}
 }
 
 type MetricsResponse struct {
@@ -485,7 +485,7 @@ type MetricsResponse struct {
 
 func (x *MetricsResponse) Reset() {
 	*x = MetricsResponse{}
-	mi := &file_proto_trace_proto_msgTypes[7]
+	mi := &file_trace_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -497,7 +497,7 @@ func (x *MetricsResponse) String() string {
 func (*MetricsResponse) ProtoMessage() {}
 
 func (x *MetricsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_trace_proto_msgTypes[7]
+	mi := &file_trace_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -510,7 +510,7 @@ func (x *MetricsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MetricsResponse.ProtoReflect.Descriptor instead.
 func (*MetricsResponse) Descriptor() ([]byte, []int) {
-	return file_proto_trace_proto_rawDescGZIP(), []int{7}
+	return file_trace_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *MetricsResponse) GetMetrics() *ResourceMetrics {
@@ -529,7 +529,7 @@ type SignatureResponse struct {
 
 func (x *SignatureResponse) Reset() {
 	*x = SignatureResponse{}
-	mi := &file_proto_trace_proto_msgTypes[8]
+	mi := &file_trace_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -541,7 +541,7 @@ func (x *SignatureResponse) String() string {
 func (*SignatureResponse) ProtoMessage() {}
 
 func (x *SignatureResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_trace_proto_msgTypes[8]
+	mi := &file_trace_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -554,7 +554,7 @@ func (x *SignatureResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SignatureResponse.ProtoReflect.Descriptor instead.
 func (*SignatureResponse) Descriptor() ([]byte, []int) {
-	return file_proto_trace_proto_rawDescGZIP(), []int{8}
+	return file_trace_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *SignatureResponse) GetSignature() *WorkloadSignature {
@@ -581,7 +581,7 @@ type TraceResponse struct {
 
 func (x *TraceResponse) Reset() {
 	*x = TraceResponse{}
-	mi := &file_proto_trace_proto_msgTypes[9]
+	mi := &file_trace_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -593,7 +593,7 @@ func (x *TraceResponse) String() string {
 func (*TraceResponse) ProtoMessage() {}
 
 func (x *TraceResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_trace_proto_msgTypes[9]
+	mi := &file_trace_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -606,7 +606,7 @@ func (x *TraceResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TraceResponse.ProtoReflect.Descriptor instead.
 func (*TraceResponse) Descriptor() ([]byte, []int) {
-	return file_proto_trace_proto_rawDescGZIP(), []int{9}
+	return file_trace_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *TraceResponse) GetTraceId() string {
@@ -682,7 +682,7 @@ type StageHistoryResponse struct {
 
 func (x *StageHistoryResponse) Reset() {
 	*x = StageHistoryResponse{}
-	mi := &file_proto_trace_proto_msgTypes[10]
+	mi := &file_trace_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -694,7 +694,7 @@ func (x *StageHistoryResponse) String() string {
 func (*StageHistoryResponse) ProtoMessage() {}
 
 func (x *StageHistoryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_trace_proto_msgTypes[10]
+	mi := &file_trace_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -707,7 +707,7 @@ func (x *StageHistoryResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StageHistoryResponse.ProtoReflect.Descriptor instead.
 func (*StageHistoryResponse) Descriptor() ([]byte, []int) {
-	return file_proto_trace_proto_rawDescGZIP(), []int{10}
+	return file_trace_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *StageHistoryResponse) GetCurrentStage() PipelineStage {
@@ -739,7 +739,7 @@ type StageTransitionEvent struct {
 
 func (x *StageTransitionEvent) Reset() {
 	*x = StageTransitionEvent{}
-	mi := &file_proto_trace_proto_msgTypes[11]
+	mi := &file_trace_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -751,7 +751,7 @@ func (x *StageTransitionEvent) String() string {
 func (*StageTransitionEvent) ProtoMessage() {}
 
 func (x *StageTransitionEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_trace_proto_msgTypes[11]
+	mi := &file_trace_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -764,7 +764,7 @@ func (x *StageTransitionEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StageTransitionEvent.ProtoReflect.Descriptor instead.
 func (*StageTransitionEvent) Descriptor() ([]byte, []int) {
-	return file_proto_trace_proto_rawDescGZIP(), []int{11}
+	return file_trace_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *StageTransitionEvent) GetTraceId() string {
@@ -827,7 +827,7 @@ type HealthCheckResponse struct {
 
 func (x *HealthCheckResponse) Reset() {
 	*x = HealthCheckResponse{}
-	mi := &file_proto_trace_proto_msgTypes[12]
+	mi := &file_trace_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -839,7 +839,7 @@ func (x *HealthCheckResponse) String() string {
 func (*HealthCheckResponse) ProtoMessage() {}
 
 func (x *HealthCheckResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_trace_proto_msgTypes[12]
+	mi := &file_trace_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -852,7 +852,7 @@ func (x *HealthCheckResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HealthCheckResponse.ProtoReflect.Descriptor instead.
 func (*HealthCheckResponse) Descriptor() ([]byte, []int) {
-	return file_proto_trace_proto_rawDescGZIP(), []int{12}
+	return file_trace_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *HealthCheckResponse) GetHealthy() bool {
@@ -912,7 +912,7 @@ type ResourceMetrics struct {
 
 func (x *ResourceMetrics) Reset() {
 	*x = ResourceMetrics{}
-	mi := &file_proto_trace_proto_msgTypes[13]
+	mi := &file_trace_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -924,7 +924,7 @@ func (x *ResourceMetrics) String() string {
 func (*ResourceMetrics) ProtoMessage() {}
 
 func (x *ResourceMetrics) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_trace_proto_msgTypes[13]
+	mi := &file_trace_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -937,7 +937,7 @@ func (x *ResourceMetrics) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResourceMetrics.ProtoReflect.Descriptor instead.
 func (*ResourceMetrics) Descriptor() ([]byte, []int) {
-	return file_proto_trace_proto_rawDescGZIP(), []int{13}
+	return file_trace_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *ResourceMetrics) GetTimestampUnix() int64 {
@@ -1129,7 +1129,7 @@ type WorkloadSignature struct {
 
 func (x *WorkloadSignature) Reset() {
 	*x = WorkloadSignature{}
-	mi := &file_proto_trace_proto_msgTypes[14]
+	mi := &file_trace_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1141,7 +1141,7 @@ func (x *WorkloadSignature) String() string {
 func (*WorkloadSignature) ProtoMessage() {}
 
 func (x *WorkloadSignature) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_trace_proto_msgTypes[14]
+	mi := &file_trace_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1154,7 +1154,7 @@ func (x *WorkloadSignature) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WorkloadSignature.ProtoReflect.Descriptor instead.
 func (*WorkloadSignature) Descriptor() ([]byte, []int) {
-	return file_proto_trace_proto_rawDescGZIP(), []int{14}
+	return file_trace_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *WorkloadSignature) GetPodName() string {
@@ -1313,7 +1313,7 @@ type PipelineStageMetrics struct {
 
 func (x *PipelineStageMetrics) Reset() {
 	*x = PipelineStageMetrics{}
-	mi := &file_proto_trace_proto_msgTypes[15]
+	mi := &file_trace_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1325,7 +1325,7 @@ func (x *PipelineStageMetrics) String() string {
 func (*PipelineStageMetrics) ProtoMessage() {}
 
 func (x *PipelineStageMetrics) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_trace_proto_msgTypes[15]
+	mi := &file_trace_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1338,7 +1338,7 @@ func (x *PipelineStageMetrics) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PipelineStageMetrics.ProtoReflect.Descriptor instead.
 func (*PipelineStageMetrics) Descriptor() ([]byte, []int) {
-	return file_proto_trace_proto_rawDescGZIP(), []int{15}
+	return file_trace_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *PipelineStageMetrics) GetStage() PipelineStage {
@@ -1446,11 +1446,11 @@ func (x *PipelineStageMetrics) GetSampleCount() int32 {
 	return 0
 }
 
-var File_proto_trace_proto protoreflect.FileDescriptor
+var File_trace_proto protoreflect.FileDescriptor
 
-const file_proto_trace_proto_rawDesc = "" +
+const file_trace_proto_rawDesc = "" +
 	"\n" +
-	"\x11proto/trace.proto\x12\x10insight.trace.v1\"\x13\n" +
+	"\vtrace.proto\x12\x10insight.trace.v1\"\x13\n" +
 	"\x11GetMetricsRequest\"\x15\n" +
 	"\x13GetSignatureRequest\"u\n" +
 	"\x0fGetTraceRequest\x126\n" +
@@ -1588,20 +1588,20 @@ const file_proto_trace_proto_rawDesc = "" +
 	"\vHealthCheck\x12$.insight.trace.v1.HealthCheckRequest\x1a%.insight.trace.v1.HealthCheckResponseB\x1dZ\x1binsight-scope/proto/tracepbb\x06proto3"
 
 var (
-	file_proto_trace_proto_rawDescOnce sync.Once
-	file_proto_trace_proto_rawDescData []byte
+	file_trace_proto_rawDescOnce sync.Once
+	file_trace_proto_rawDescData []byte
 )
 
-func file_proto_trace_proto_rawDescGZIP() []byte {
-	file_proto_trace_proto_rawDescOnce.Do(func() {
-		file_proto_trace_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_proto_trace_proto_rawDesc), len(file_proto_trace_proto_rawDesc)))
+func file_trace_proto_rawDescGZIP() []byte {
+	file_trace_proto_rawDescOnce.Do(func() {
+		file_trace_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_trace_proto_rawDesc), len(file_trace_proto_rawDesc)))
 	})
-	return file_proto_trace_proto_rawDescData
+	return file_trace_proto_rawDescData
 }
 
-var file_proto_trace_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
-var file_proto_trace_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
-var file_proto_trace_proto_goTypes = []any{
+var file_trace_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
+var file_trace_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
+var file_trace_proto_goTypes = []any{
 	(WorkloadType)(0),              // 0: insight.trace.v1.WorkloadType
 	(PipelineStage)(0),             // 1: insight.trace.v1.PipelineStage
 	(IOPattern)(0),                 // 2: insight.trace.v1.IOPattern
@@ -1622,7 +1622,7 @@ var file_proto_trace_proto_goTypes = []any{
 	(*WorkloadSignature)(nil),      // 17: insight.trace.v1.WorkloadSignature
 	(*PipelineStageMetrics)(nil),   // 18: insight.trace.v1.PipelineStageMetrics
 }
-var file_proto_trace_proto_depIdxs = []int32{
+var file_trace_proto_depIdxs = []int32{
 	16, // 0: insight.trace.v1.MetricsResponse.metrics:type_name -> insight.trace.v1.ResourceMetrics
 	17, // 1: insight.trace.v1.SignatureResponse.signature:type_name -> insight.trace.v1.WorkloadSignature
 	17, // 2: insight.trace.v1.TraceResponse.current_signature:type_name -> insight.trace.v1.WorkloadSignature
@@ -1658,27 +1658,27 @@ var file_proto_trace_proto_depIdxs = []int32{
 	0,  // [0:14] is the sub-list for field type_name
 }
 
-func init() { file_proto_trace_proto_init() }
-func file_proto_trace_proto_init() {
-	if File_proto_trace_proto != nil {
+func init() { file_trace_proto_init() }
+func file_trace_proto_init() {
+	if File_trace_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_trace_proto_rawDesc), len(file_proto_trace_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_trace_proto_rawDesc), len(file_trace_proto_rawDesc)),
 			NumEnums:      3,
 			NumMessages:   16,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_proto_trace_proto_goTypes,
-		DependencyIndexes: file_proto_trace_proto_depIdxs,
-		EnumInfos:         file_proto_trace_proto_enumTypes,
-		MessageInfos:      file_proto_trace_proto_msgTypes,
+		GoTypes:           file_trace_proto_goTypes,
+		DependencyIndexes: file_trace_proto_depIdxs,
+		EnumInfos:         file_trace_proto_enumTypes,
+		MessageInfos:      file_trace_proto_msgTypes,
 	}.Build()
-	File_proto_trace_proto = out.File
-	file_proto_trace_proto_goTypes = nil
-	file_proto_trace_proto_depIdxs = nil
+	File_trace_proto = out.File
+	file_trace_proto_goTypes = nil
+	file_trace_proto_depIdxs = nil
 }
