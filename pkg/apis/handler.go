@@ -2,6 +2,7 @@ package apis
 
 import (
 	"net/http"
+	"strconv"
 
 	"insight-scope/pkg/controller"
 	"insight-scope/pkg/types"
@@ -312,7 +313,7 @@ func (h *Handler) generateRecommendation(req *RecommendRequest) *types.StorageRe
 	if req.GPUCount > 0 {
 		rec.ThroughputMBps += int64(req.GPUCount * 100)
 		rec.IOPS += int64(req.GPUCount * 1000)
-		rec.Reasoning += " (adjusted for " + string(rune(req.GPUCount+'0')) + " GPUs)"
+		rec.Reasoning += " (adjusted for " + strconv.Itoa(req.GPUCount) + " GPUs)"
 	}
 
 	// Adjust based on data size
@@ -388,7 +389,7 @@ func (h *Handler) calculateStorageSize(dataSizeGB int) string {
 	totalSize := int(float64(dataSizeGB) * 1.5)
 
 	if totalSize >= 1024 {
-		return string(rune(totalSize/1024+'0')) + "Ti"
+		return strconv.Itoa(totalSize/1024) + "Ti"
 	}
-	return string(rune(totalSize+'0')) + "Gi"
+	return strconv.Itoa(totalSize) + "Gi"
 }
