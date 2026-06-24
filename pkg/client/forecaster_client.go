@@ -5,30 +5,37 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
+	hubpb "insight-hub/proto/hubpb"
 	pb "insight-scope/proto/forecasterpb"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-// ForecasterClient is a gRPC client for Node Resource Forecaster
+// ForecasterClient는 노드 히스토리 ingest를 Insight Hub로만 보내고,
+// Forecast*/GetPeakIdle RPC는 Forecaster를 사용한다.
 type ForecasterClient struct {
-	endpoint  string
-	conn      *grpc.ClientConn
-	client    pb.NodeResourceForecasterServiceClient
+	hubEndpoint   string
+	hubConn       *grpc.ClientConn
+	hubClient     hubpb.InsightHubServiceClient
+
+	forecastEndpoint string
+	forecastConn     *grpc.ClientConn
+	client           pb.NodeResourceForecasterServiceClient
+
 	connected bool
 	mu        sync.RWMutex
 
-	// Batch history data before sending
-	historyBuffer   map[string][]ResourceSnapshot
-	bufferMu        sync.Mutex
-	bufferSize      int
-	flushInterval   time.Duration
-	stopChan        chan struct{}
+	historyBuffer map[string][]ResourceSnapshot
+	bufferMu      sync.Mutex
+	bufferSize    int
+	flushInterval time.Duration
+	stopChan      chan struct{}
+	wg            sync.WaitGroup
 }
 
 // ResourceSnapshot represents a single resource utilization snapshot
@@ -38,6 +45,26 @@ type ResourceSnapshot struct {
 	MemoryUtilization float64
 	GPUUtilization    float64
 	StorageIOUtil     float64
+	// 비어 있으면 노드 집계; 둘 다 있으면 Pod 단위(Insight Hub에서 워크로드와 구분)
+	PodNamespace string
+	PodName      string
+}
+
+const bufKeySep = "\x1f"
+
+func podBufferKey(nodeName, podNs, podName string) string {
+	return nodeName + bufKeySep + podNs + bufKeySep + podName
+}
+
+func parseBufferKey(key string) (nodeName, podNs, podName string) {
+	parts := strings.Split(key, bufKeySep)
+	if len(parts) == 1 {
+		return parts[0], "", ""
+	}
+	if len(parts) == 3 {
+		return parts[0], parts[1], parts[2]
+	}
+	return key, "", ""
 }
 
 var (
@@ -45,26 +72,35 @@ var (
 	forecasterClientOnce   sync.Once
 )
 
+// newForecasterClient builds a client and starts its backgroundFlush goroutine
+// (tracked via wg so Close can join it). It does NOT dial; call Connect for that.
+func newForecasterClient(hubEP, fcEP string) *ForecasterClient {
+	c := &ForecasterClient{
+		hubEndpoint:      hubEP,
+		forecastEndpoint: fcEP,
+		historyBuffer:    make(map[string][]ResourceSnapshot),
+		bufferSize:       60,
+		flushInterval:    5 * time.Minute,
+		stopChan:         make(chan struct{}),
+	}
+
+	c.wg.Add(1)
+	go c.backgroundFlush()
+
+	return c
+}
+
 // GetForecasterClient returns the singleton Forecaster client
 func GetForecasterClient() *ForecasterClient {
 	forecasterClientOnce.Do(func() {
-		endpoint := os.Getenv("FORECASTER_ENDPOINT")
-		if endpoint == "" {
-			endpoint = "node-resource-forecaster.apollo.svc.cluster.local:50055"
+		fcEP := os.Getenv("FORECASTER_ENDPOINT")
+		if fcEP == "" {
+			fcEP = "node-resource-forecaster.apollo.svc.cluster.local:50055"
 		}
+		hubEP := os.Getenv("INSIGHT_HUB_ENDPOINT")
 
-		globalForecasterClient = &ForecasterClient{
-			endpoint:      endpoint,
-			historyBuffer: make(map[string][]ResourceSnapshot),
-			bufferSize:    60, // Flush every 60 snapshots (1 hour if 1/min)
-			flushInterval: 5 * time.Minute,
-			stopChan:      make(chan struct{}),
-		}
+		globalForecasterClient = newForecasterClient(hubEP, fcEP)
 
-		// Start background flush goroutine
-		go globalForecasterClient.backgroundFlush()
-
-		// Try to connect (non-blocking)
 		go func() {
 			if err := globalForecasterClient.Connect(); err != nil {
 				log.Printf("[ForecasterClient] Initial connection failed: %v", err)
@@ -74,7 +110,16 @@ func GetForecasterClient() *ForecasterClient {
 	return globalForecasterClient
 }
 
-// Connect establishes connection to Forecaster
+func dial(ctx context.Context, addr string) (*grpc.ClientConn, error) {
+	return grpc.DialContext(
+		ctx,
+		addr,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithBlock(),
+	)
+}
+
+// Connect establishes gRPC connections (hub ingest + optional forecaster for forecasts).
 func (c *ForecasterClient) Connect() error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -83,39 +128,69 @@ func (c *ForecasterClient) Connect() error {
 		return nil
 	}
 
-	log.Printf("[ForecasterClient] Connecting to %s", c.endpoint)
-
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	conn, err := grpc.DialContext(
-		ctx,
-		c.endpoint,
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithBlock(),
-	)
-	if err != nil {
-		return fmt.Errorf("failed to connect to Forecaster: %w", err)
+	if c.hubEndpoint != "" {
+		log.Printf("[ForecasterClient] Connecting to Insight Hub (ingest): %s", c.hubEndpoint)
+		hubConn, err := dial(ctx, c.hubEndpoint)
+		if err != nil {
+			return fmt.Errorf("insight hub: %w", err)
+		}
+		c.hubConn = hubConn
+		c.hubClient = hubpb.NewInsightHubServiceClient(hubConn)
+		log.Printf("[scope→hub] connected ingest endpoint=%s (metrics history will be sent here, not to Forecaster)", c.hubEndpoint)
+
+		if err := c.connectForecastLocked(ctx); err != nil {
+			log.Printf("[ForecasterClient] Forecaster unreachable (Forecast/PeakIdle will fail): %v", err)
+		}
+	} else {
+		return fmt.Errorf("INSIGHT_HUB_ENDPOINT is required (metrics ingest must go to Insight Hub, not Forecaster SubmitHistoryData)")
 	}
 
-	c.conn = conn
-	c.client = pb.NewNodeResourceForecasterServiceClient(conn)
 	c.connected = true
-	log.Printf("[ForecasterClient] Connected to Forecaster")
 	return nil
 }
 
-// Close closes the connection
+func (c *ForecasterClient) connectForecastLocked(ctx context.Context) error {
+	log.Printf("[ForecasterClient] Connecting to Forecaster (forecast RPCs): %s", c.forecastEndpoint)
+	fcConn, err := dial(ctx, c.forecastEndpoint)
+	if err != nil {
+		return fmt.Errorf("forecaster: %w", err)
+	}
+	c.forecastConn = fcConn
+	c.client = pb.NewNodeResourceForecasterServiceClient(fcConn)
+	return nil
+}
+
+// Close signals the backgroundFlush goroutine to stop, waits for it to exit, and
+// then tears down the gRPC connections. Safe to call more than once.
 func (c *ForecasterClient) Close() error {
 	c.mu.Lock()
-	defer c.mu.Unlock()
-
-	close(c.stopChan)
-
-	if c.conn != nil {
-		c.connected = false
-		return c.conn.Close()
+	select {
+	case <-c.stopChan:
+	default:
+		close(c.stopChan)
 	}
+	c.mu.Unlock()
+
+	// Join the background goroutine outside the lock: backgroundFlush -> flush
+	// paths take c.mu (RLock), so waiting while holding it would deadlock.
+	c.wg.Wait()
+
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if c.hubConn != nil {
+		_ = c.hubConn.Close()
+		c.hubConn = nil
+	}
+	if c.forecastConn != nil {
+		_ = c.forecastConn.Close()
+		c.forecastConn = nil
+	}
+	c.connected = false
+	c.hubClient = nil
+	c.client = nil
 	return nil
 }
 
@@ -126,16 +201,15 @@ func (c *ForecasterClient) IsConnected() bool {
 	return c.connected
 }
 
-// AddSnapshot adds a resource snapshot to the buffer
-func (c *ForecasterClient) AddSnapshot(nodeName string, snapshot ResourceSnapshot) {
+// AddSnapshot adds a resource snapshot to the buffer (bufferKey = 노드명 또는 podBufferKey)
+func (c *ForecasterClient) AddSnapshot(bufferKey string, snapshot ResourceSnapshot) {
 	c.bufferMu.Lock()
 	defer c.bufferMu.Unlock()
 
-	c.historyBuffer[nodeName] = append(c.historyBuffer[nodeName], snapshot)
+	c.historyBuffer[bufferKey] = append(c.historyBuffer[bufferKey], snapshot)
 
-	// Check if we should flush
-	if len(c.historyBuffer[nodeName]) >= c.bufferSize {
-		go c.flushNode(nodeName)
+	if len(c.historyBuffer[bufferKey]) >= c.bufferSize {
+		go c.flushBuffer(bufferKey)
 	}
 }
 
@@ -150,11 +224,27 @@ func (c *ForecasterClient) AddNodeMetrics(nodeName string, cpuUtil, memUtil, gpu
 	})
 }
 
-// flushNode sends buffered data for a specific node
-func (c *ForecasterClient) flushNode(nodeName string) {
+// AddPodMetrics sends per-pod utilization (metrics-server / requests) to Hub with pod identity.
+func (c *ForecasterClient) AddPodMetrics(nodeName, podNs, podName string, cpuUtil, memUtil, gpuUtil, storageIOUtil float64) {
+	if podNs == "" || podName == "" {
+		return
+	}
+	key := podBufferKey(nodeName, podNs, podName)
+	c.AddSnapshot(key, ResourceSnapshot{
+		Timestamp:         time.Now(),
+		CPUUtilization:    cpuUtil,
+		MemoryUtilization: memUtil,
+		GPUUtilization:    gpuUtil,
+		StorageIOUtil:     storageIOUtil,
+		PodNamespace:      podNs,
+		PodName:           podName,
+	})
+}
+
+func (c *ForecasterClient) flushBuffer(bufferKey string) {
 	c.bufferMu.Lock()
-	snapshots := c.historyBuffer[nodeName]
-	c.historyBuffer[nodeName] = nil // Clear buffer
+	snapshots := c.historyBuffer[bufferKey]
+	c.historyBuffer[bufferKey] = nil
 	c.bufferMu.Unlock()
 
 	if len(snapshots) == 0 {
@@ -164,66 +254,64 @@ func (c *ForecasterClient) flushNode(nodeName string) {
 	if !c.IsConnected() {
 		if err := c.Connect(); err != nil {
 			log.Printf("[ForecasterClient] Cannot flush, not connected: %v", err)
-			// Put snapshots back in buffer (partial recovery)
 			c.bufferMu.Lock()
-			c.historyBuffer[nodeName] = append(snapshots, c.historyBuffer[nodeName]...)
+			c.historyBuffer[bufferKey] = append(snapshots, c.historyBuffer[bufferKey]...)
 			c.bufferMu.Unlock()
 			return
 		}
 	}
 
-	if err := c.submitHistory(nodeName, snapshots); err != nil {
-		log.Printf("[ForecasterClient] Failed to submit history for %s: %v", nodeName, err)
+	if err := c.submitHistory(bufferKey, snapshots); err != nil {
+		log.Printf("[ForecasterClient] Failed to submit history for %s: %v", bufferKey, err)
 	} else {
-		log.Printf("[ForecasterClient] Submitted %d snapshots for node %s", len(snapshots), nodeName)
+		log.Printf("[ForecasterClient] Submitted %d snapshots for buffer %s", len(snapshots), bufferKey)
 	}
 }
 
-// submitHistory sends history data to Forecaster via gRPC
-func (c *ForecasterClient) submitHistory(nodeName string, snapshots []ResourceSnapshot) error {
+func (c *ForecasterClient) submitHistory(bufferKey string, snapshots []ResourceSnapshot) error {
+	nodeName, _, _ := parseBufferKey(bufferKey)
 	c.mu.RLock()
-	client := c.client
+	hub := c.hubClient
 	c.mu.RUnlock()
-
-	if client == nil {
-		return fmt.Errorf("client not initialized")
-	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	// Convert snapshots to proto format
-	protoSnapshots := make([]*pb.ResourceSnapshot, len(snapshots))
-	for i, s := range snapshots {
-		protoSnapshots[i] = &pb.ResourceSnapshot{
-			Timestamp:              timestamppb.New(s.Timestamp),
-			CpuUtilization:         s.CPUUtilization,
-			MemoryUtilization:      s.MemoryUtilization,
-			GpuUtilization:         s.GPUUtilization,
-			StorageIoUtilization:   s.StorageIOUtil,
+	if hub != nil {
+		protoSnaps := make([]*hubpb.ResourceSnapshot, len(snapshots))
+		for i, s := range snapshots {
+			protoSnaps[i] = &hubpb.ResourceSnapshot{
+				TimestampUnixMs:      s.Timestamp.UnixMilli(),
+				CpuUtilization:       s.CPUUtilization,
+				MemoryUtilization:    s.MemoryUtilization,
+				GpuUtilization:       s.GPUUtilization,
+				StorageIoUtilization: s.StorageIOUtil,
+			}
+			if s.PodNamespace != "" && s.PodName != "" {
+				ns, pn := s.PodNamespace, s.PodName
+				protoSnaps[i].PodNamespace = &ns
+				protoSnaps[i].PodName = &pn
+			}
 		}
+		req := &hubpb.SubmitHistoryRequest{NodeName: nodeName, Snapshots: protoSnaps}
+		resp, err := hub.SubmitHistoryData(ctx, req)
+		if err != nil {
+			return fmt.Errorf("insight hub: %w", err)
+		}
+		if !resp.Accepted {
+			return fmt.Errorf("insight hub rejected data")
+		}
+		log.Printf("[scope→hub] gRPC SubmitHistoryData ok node=%s sent_batch=%d hub_accepted_rows=%d",
+			nodeName, len(snapshots), resp.SnapshotsProcessed)
+		return nil
 	}
 
-	req := &pb.SubmitHistoryRequest{
-		NodeName:  nodeName,
-		Snapshots: protoSnapshots,
-	}
-
-	resp, err := client.SubmitHistoryData(ctx, req)
-	if err != nil {
-		return fmt.Errorf("gRPC call failed: %w", err)
-	}
-
-	if !resp.Accepted {
-		return fmt.Errorf("forecaster rejected data")
-	}
-
-	log.Printf("[ForecasterClient] Forecaster accepted %d snapshots for %s", resp.SnapshotsProcessed, nodeName)
-	return nil
+	return fmt.Errorf("insight hub client unavailable (INSIGHT_HUB_ENDPOINT must be set and Connect must succeed before flush)")
 }
 
-// backgroundFlush periodically flushes all buffered data
 func (c *ForecasterClient) backgroundFlush() {
+	defer c.wg.Done()
+
 	ticker := time.NewTicker(c.flushInterval)
 	defer ticker.Stop()
 
@@ -248,8 +336,8 @@ func (c *ForecasterClient) FlushAll() {
 	}
 	c.bufferMu.Unlock()
 
-	for _, nodeName := range nodes {
-		c.flushNode(nodeName)
+	for _, k := range nodes {
+		c.flushBuffer(k)
 	}
 }
 
